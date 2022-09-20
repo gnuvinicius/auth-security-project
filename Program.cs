@@ -17,7 +17,7 @@ builder.Services.AddControllers()
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddDbContext<SecurityContext>(options => 
-    options.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]));
+    options.UseNpgsql(builder.Configuration["ConnectionStrings"]));
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -91,7 +91,7 @@ builder.Services.AddMvc(config =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
