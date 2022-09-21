@@ -13,8 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-
-
 // dependency injections
 builder.Services.AddScoped<IAuthService, AuthService>();
 

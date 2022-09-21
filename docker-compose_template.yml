@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: "security_dev"
       POSTGRES_USER: "garage474_dev"
-      POSTGRES_PASSWORD: ""
+      POSTGRES_PASSWORD: "Password"
       ALLOW_EMPTY_PASSWORD: "no"
     ports:
       - "5432:5432"
@@ -17,13 +17,17 @@ services:
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: "root@garage474.dev"
-      PGADMIN_DEFAULT_PASSWORD: ""
+      PGADMIN_DEFAULT_PASSWORD: "Password"
     ports:
       - "16543:80"
     depends_on:
       - db
   api:
     build: .
+    environment:
+      secret: "secret"
+      salt: "12"
+      ConnectionStrings:DefaultConnection: "Server=db;Port=5432;Database=security_dev;User Id=garage474_dev;Password=Password"
     ports:
       - "8080:80"
     depends_on:

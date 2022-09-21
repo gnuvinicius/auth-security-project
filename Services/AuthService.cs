@@ -11,11 +11,13 @@ public class AuthService : IAuthService
 {
     private readonly SecurityContext _context;
     private readonly ILogger<AuthService> _logger;
+    private readonly IConfiguration _configuration;
 
-    public AuthService(SecurityContext context, ILogger<AuthService> logger)
+    public AuthService(SecurityContext context, ILogger<AuthService> logger, IConfiguration configuration)
     {
         _context = context;
         _logger = logger;
+        _configuration = configuration;
     }
 
     public async Task<UserDto> CreateUser(UserDto user)
@@ -25,11 +27,7 @@ public class AuthService : IAuthService
         {
             Validate(user);
 
-            IConfiguration configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            var salt = configuration.GetValue<string>("salt");
+            var salt = _configuration["salt"];
 
             var hashed = BCrypt.Net.BCrypt.HashPassword(user.Password, Int32.Parse(salt));
 
@@ -70,14 +68,10 @@ public class AuthService : IAuthService
 
         if (verify)
         {
-            IConfiguration configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            var salt = configuration.GetValue<string>("salt");
+            var secret = _configuration["secret"];
 
             JwtSecurityTokenHandler tokenHandler = new();
-            var key = Encoding.ASCII.GetBytes(configuration.GetValue<string>("Secret"));
+            var key = Encoding.ASCII.GetBytes(secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
