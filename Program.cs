@@ -13,11 +13,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
+
+
 // dependency injections
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddDbContext<SecurityContext>(options => 
-    options.UseNpgsql(builder.Configuration["ConnectionStrings"]));
+    options.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]));
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -101,11 +103,13 @@ if (!app.Environment.IsProduction())
     });
 }
 
+app.UseHsts();
+
 app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 app.MapControllers();
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseAuthentication();
 

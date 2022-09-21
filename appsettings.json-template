@@ -1,9 +1,17 @@
 {
+  "https_port": 443,
+
   "Logging": {
     "LogLevel": {
       "Default": "Information",
       "Microsoft.AspNetCore": "Warning"
     }
+  },
+  "secret": "",
+  "salt": "",
+
+  "ConnectionStrings": {
+    "DefaultConnection": ""
   },
   "AllowedHosts": "*"
 }

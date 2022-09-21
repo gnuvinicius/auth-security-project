@@ -4,6 +4,7 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 docker-compose.yml
 .vagrant
+appsettings.json
 
 # User-specific files
 *.rsuser

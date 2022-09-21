@@ -1,5 +1,6 @@
 pgadmin_port = ENV["VAGRANT_PGADMIN_PORT"] || 16543
 api_port = ENV["VAGRANT_API_PORT"] || 8080
+api_sec_port = ENV["VAGRANT_API_PORT"] || 443
 
 Vagrant.configure("2") do |config|
     config.vm.network "public_network"

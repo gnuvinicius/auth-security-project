@@ -24,10 +24,6 @@ services:
       - db
   api:
     build: .
-    environment:
-      secret: ""
-      salt: ,
-      ConnectionStrings: ""
     ports:
       - "8080:80"
     depends_on:

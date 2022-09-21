@@ -9,41 +9,56 @@ namespace Security.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly IConfiguration _configuration;
-
     private readonly SecurityContext _context;
+    private readonly ILogger<AuthService> _logger;
 
-    public AuthService(IConfiguration configuration, SecurityContext context)
+    public AuthService(SecurityContext context, ILogger<AuthService> logger)
     {
         _context = context;
-        _configuration = configuration;
+        _logger = logger;
     }
 
     public async Task<UserDto> CreateUser(UserDto user)
     {
-        Validate(user);
 
-        var salt = _configuration["salt"];
-        var hashed = BCrypt.Net.BCrypt.HashPassword(user.Password, Int32.Parse(salt));
-
-        var persist = new User() {
-            Username = user.Username,
-            Password = hashed,
-            Role = "user",
-            CreatedAt = DateTime.UtcNow
-        };
-
-        await _context.Users.AddAsync(persist);
-        await _context.SaveChangesAsync();
-
-        var dto = new UserDto()
+        try
         {
-            Id = persist.Id,
-            Username = persist.Username,
-            Roles = new List<string>{ persist.Role }
-        };
+            Validate(user);
 
-        return dto;
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            var salt = configuration.GetValue<string>("salt");
+
+            var hashed = BCrypt.Net.BCrypt.HashPassword(user.Password, Int32.Parse(salt));
+
+            var persist = new User() {
+                Username = user.Username,
+                Password = hashed,
+                Role = "user",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _logger.LogWarning("User to persist {0}", persist.Username);
+
+            await _context.Users.AddAsync(persist);
+            await _context.SaveChangesAsync();
+
+            var dto = new UserDto()
+            {
+                Id = persist.Id,
+                Username = persist.Username,
+                Roles = new List<string>{ persist.Role }
+            };
+
+            return dto;
+        }
+        catch (System.Exception ex)
+        {
+            _logger.LogError("Error {0}", ex.Message);
+            throw;
+        }
     }
 
     public AuthResponseDto GenerateToken(AuthRequestDto auth)
@@ -55,8 +70,14 @@ public class AuthService : IAuthService
 
         if (verify)
         {
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            var salt = configuration.GetValue<string>("salt");
+
             JwtSecurityTokenHandler tokenHandler = new();
-            var key = Encoding.ASCII.GetBytes(_configuration["Secret"]);
+            var key = Encoding.ASCII.GetBytes(configuration.GetValue<string>("Secret"));
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
@@ -90,13 +111,11 @@ public class AuthService : IAuthService
 
     private void Validate(UserDto user) {
         
-        var userPersist = _context.Users.Where(u => u.Username == user.Username).FirstOrDefault();
+        var alreadyExists = _context.Users.Where(u => u.Username == user.Username).Any();
 
-        if (userPersist != null) {
+        if (alreadyExists) {
             throw new Exception("user already exists");
         }
-    
-        
     }
 
     #endregion
