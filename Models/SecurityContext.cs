@@ -4,7 +4,6 @@ namespace Security.Models;
 
 public class SecurityContext : DbContext
 {
-    public SecurityContext(DbContextOptions<SecurityContext> options) : base(options) { }
-
     public DbSet<User> Users => Set<User>();
+    public SecurityContext(DbContextOptions<SecurityContext> options) : base(options) { }
 }

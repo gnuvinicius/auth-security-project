@@ -1,9 +1,9 @@
 using Security.Services;
 
-namespace Security.Configurations;
+namespace Security.Extensions;
 
-internal static class DependenciesInjectionSetup {
-
+internal static class DependenciesInjectionExtension
+{
     internal static IServiceCollection ResolveDependences(this IServiceCollection services) {
 
         services.AddScoped<IAuthService, AuthService>();

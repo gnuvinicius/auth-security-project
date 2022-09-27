@@ -1,10 +1,6 @@
 using Security.Models;
-using Security.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
-using Security.Configurations;
+using Security.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,28 +14,9 @@ builder.Services.AddDbContext<SecurityContext>(options => options.UseNpgsql(buil
 
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen(config => SwaggerGenSetupOptions.Setup(config));
+builder.Services.ConfigureSwaggerGen();
 
-#region security
-
-var key = Encoding.ASCII.GetBytes(builder.Configuration["Secret"]);
-
-builder.Services.AddAuthentication(options => AuthenticationSetupOptions.AuthenticationSetup(options))
-    .AddJwtBearer(options =>  AuthenticationSetupOptions.JwtSetup(options, key));
-
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("user", policy => policy.RequireClaim("Store", "User"));
-    options.AddPolicy("admin", policy => policy.RequireClaim("Store", "Admin"));
-});
-#endregion
-
-builder.Services.AddMvc(config =>
-{
-    var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-    config.Filters.Add(new AuthorizeFilter(policy));
-});
-
+builder.Services.AuthServices(builder);
 
 #region configure app
 
@@ -47,7 +24,7 @@ var app = builder.Build();
 
 app.UseSwagger();
 
-app.UseSwaggerUI(options => SwaggerUISetupOptions.Setup(options));
+app.ConfigureSwaggerUI();
 
 app.UseHsts();
 
